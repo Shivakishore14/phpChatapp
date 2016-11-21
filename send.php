@@ -1,18 +1,15 @@
 <?php
-    $con=mysql_connect("localhost","root","");
-    if(!$con){
-            die('could not connect'.mysql_error());
-    }
-    mysql_select_db("reddy",$con);
+    include 'connection.php';
 
     $uname = $_COOKIE["name"];
-    $sql="INSERT INTO chatapp values('$uname','$_GET[to]','$_GET[msg]')";
-    $e=mysql_query($sql,$con);
-    if(!$e){
-        die('error'.mysql_error());
-    }else{
-        header("refresh:5; url=dashboard.php");
-        echo "sent<br>";
+
+    $sql="INSERT INTO $tablename values('$uname','$_GET[to]','$_GET[msg]',$t)";
+
+    if($conn->query($sql) === TRUE){
+        echo "sent";
+        header("refresh:2; url=dashboard.php");
+    } else {
+        echo "not sent";
     }
-    mysql_close($con);
+    $conn->close();
 ?>

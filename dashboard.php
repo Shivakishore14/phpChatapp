@@ -9,27 +9,24 @@
     </form>
     <div name="msgarea">
         <?php
+            include 'connection.php';
+
     	    $uname = $_COOKIE["name"];
             if (!isset($uname)){
                 header("refresh:1; url=login.php");
             }
             echo "<div id='uname'>$uname</div>";
-            $con=mysql_connect("localhost","root","");
-            if(!$con){
-                    die('could not connect'.mysql_error());
-            }
-            mysql_select_db("reddy",$con);
-            $sql="select from1,msg from chatapp where to1='$uname'";
-            $e=mysql_query($sql,$con);
-            if(!$e) {
-                die('error'.mysql_error());
-            } else {
-                while($row = mysql_fetch_array($e)){
-                    echo"<b>{$row[0]}</b> : "."{$row[1]}<br/>";
+
+            $sql="select fromuser, msg from $tablename where touser='$uname'";
+            $result = $conn->query($sql);
+
+            if($result->num_rows > 0){
+                while ($row = $result->fetch_assoc()){
+                    echo "<b>".$row['fromuser'].": </b>".$row["msg"]."<br>";
                 }
             }
-            mysql_close($con);
-            ?>
+            $conn->close();
+        ?>
         </div>
     </body>
 </html>

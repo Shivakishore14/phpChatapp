@@ -10,7 +10,7 @@
   $uname = $_GET[uname];
 	 if (isset($uname)){
 	    setcookie("name", $uname, time()+3600, "/", "", 0);
-		 header("refresh:1; url=dashboard.php");
+		 header("refresh:0; url=dashboard.php");
 	 }
   ?>
 </html>
