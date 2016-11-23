@@ -17,6 +17,9 @@
                 if ($row['password'] == $_GET["pass"]){
                     echo "valid";
                     setcookie("name", $_GET["uname"], time()+3600, "/", "", 0);
+                    header("refresh:0; url=chat.html");
+                }else{
+                    echo "not valid";
                 }
             }else{
                 echo "not valid";

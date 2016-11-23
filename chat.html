@@ -1,0 +1,190 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="css/bootstrap-theme.css"/>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div id="test"></div>
+        <div class="container-fluid">
+            <div class="row" id="root">
+                <div class=" col-sm-3 col-md-3 col-3" id="sidePanel">
+                    <div id="profile">
+                        <img src="images/default123.png" id="profileImg" class="img-rounded" alt="Dp" width="100" height="100">
+                        <div id="profileName">User</div>
+                    </div>
+                    <hr>
+                    <div id="listUser"></div>
+                    <button class="btn btn-default" data-toggle="modal" data-target="#myModal">New Chat</button>
+                </div>
+                <div class="col-md-9 col-sm-9" id="msgPanel">
+                    <span id="cid" hidden></span><div id="toUser">To User</div>
+                    <div id="convoRoot" class="row">
+                        <div id="convoOuter" class="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+                            <div id="convo">
+                                <div id="convoBody">
+                                    <div class="byMe">Select a user</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 col-sm-12">
+                                        <div class="input-group" >
+                                            <input type="text" class="form-control" id="msg" placeholder="type message here">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" onclick="sendMsg()" type="button">Go!</button>
+                                            </span>
+                                        </div><!-- /input-group -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modal Header</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" class="form-control" id="newChatUser" placeholder="user name"></input>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="newChat()">okay</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <style>
+        #sidePanel{
+            background-color: #F0F0F0;
+            height:100%;
+        }
+        #test{
+            position: absolute;
+            top:0px;
+            left:0px;
+            width: 100%;
+            height:100%;
+        }
+        #root{
+            background-color: #F8F8F8;
+        }
+        #convoOuter{
+            background-color: #F0F0F0;
+            height: 80%;
+        }
+        #convoBody{
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background-color: #FFF;
+            height:85%;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: scroll;
+        }
+        .byMe{
+            float: right;
+            text-align: right;
+        }
+        .byMe, .toMe{
+
+            width: 100%;
+            padding:5px 10px 5px 10px;
+
+        }
+        #profileImg{
+            background-color: #e0e0e0;
+        }
+        #profileName{
+            width:100%;
+            font-weight: bold;
+            font-size: 30px;
+        }
+        #hr{
+            color:#000;
+        }
+    </style>
+    <script>
+        var h = $("#test").height();
+        $("#test").hide();
+        $("#root").height(h);
+        $("#msg").keyup(function(event){
+            if(event.keyCode == 13){
+                sendMsg();
+            }
+        });
+    </script>
+    <script>
+        function userClicked(obj){
+            $("#cid").html(obj.getAttribute("cid"));
+            $("#toUser").html(obj.getAttribute("user"));
+            loadConvo();
+        }
+        function sendMsg(){
+            msg = $("#msg").val();
+            cid = $("#cid").html();
+            if(msg.length > 0 && cid > 0){
+                $("#msg").val("");
+                $.get("send.php",{cid:cid, msg:msg},function(result){
+
+                    //alert(result);
+                });
+            }
+        }
+        function loadConvo(){
+            cid = $("#cid").html();
+            toUser = $("#toUser").html();
+            $.get("getMessage.php",{cid:cid},function(result){
+                var obj = JSON.parse(result);
+                s = '';
+                for (i in obj){
+                    conClass = "byMe";
+                    if (obj[i].user == toUser ){
+                        conClass = "toMe"
+                    }
+                    s = s + `<div class="`+conClass+`">`+obj[i].msg+`</div>`
+                }
+                $("#convoBody").html(s);
+                setTimeout(loadConvo,1000);
+            });
+        }
+        function newChat(){
+            user = $("#newChatUser").val();
+            if(user.length > 0){
+                $.get("newConversation.php",{to:user},function(result){
+                    alert(result);
+                });
+            }
+        }
+    </script>
+    <script>
+        $.get("getConversationList.php",{},function(result){
+            //alert(result);
+            console.log(result);
+            var obj = JSON.parse(result);
+            s = "";
+            for (i in obj){
+                s = s + `<div cid="`+obj[i].cid+`" user="` + obj[i].user + `" onclick="userClicked(this)">` + obj[i].user + `</div>`
+                console.log(obj[i]);
+            }
+            $("#listUser").html(s);
+        });
+        $.get("profile.php",{},function(result){
+            var obj = JSON.parse(result);
+            dp = "images/default123.png";
+            if(obj.dp != ""){
+                dp = obj.dp;
+            }
+            $("#profileImg").attr("src", dp);
+            $("#profileName").html(obj.user);
+        });
+    </script>
+</html>
